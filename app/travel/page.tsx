@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card"
 import { plugIconMap } from "@/components/plug-icons"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Combobox } from "@/components/ui/combobox"
+import { Badge } from "@/components/ui/badge"
 import { adapterData } from "@/lib/adapter-data"
 import Link from "next/link"
 import { ArrowRight, CheckCircle2, XCircle, AlertCircle } from "lucide-react"
@@ -61,8 +62,24 @@ export default function TravelPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-mono font-semibold mb-2">Travel Compatibility</h1>
-          <p className="text-muted-foreground">
-            Can I go from X to Y with my plug if I am from the following country?
+          <p className="text-muted-foreground flex items-center gap-2 flex-wrap">
+            {originCountry && destinationCountry ? (
+              <>
+                Can I go from <Badge variant="default">{originCountry}</Badge> to <Badge variant="default">{destinationCountry}</Badge> with my plug?
+              </>
+            ) : originCountry ? (
+              <>
+                Can I go from <Badge variant="default">{originCountry}</Badge> to <Badge variant="outline">Y</Badge> with my plug?
+              </>
+            ) : destinationCountry ? (
+              <>
+                Can I go from <Badge variant="outline">X</Badge> to <Badge variant="default">{destinationCountry}</Badge> with my plug?
+              </>
+            ) : (
+              <>
+                Can I go from <Badge variant="outline">X</Badge> to <Badge variant="outline">Y</Badge> with my plug if I am from the following country?
+              </>
+            )}
           </p>
         </div>
 
