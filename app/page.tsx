@@ -598,88 +598,60 @@ const adapterData = [
 const allPlugTypes = Array.from(new Set(adapterData.flatMap((item) => item.types))).sort()
 const allContinents = Array.from(new Set(adapterData.map((item) => item.continent))).sort()
 
-const plugTypeInfo = [
-  { type: "A", description: "North American 2-pin (ungrounded)" },
-  { type: "B", description: "North American 3-pin (grounded)" },
-  { type: "C", description: "European 2-pin (ungrounded)" },
-  { type: "D", description: "Indian 3-pin (large)" },
-  { type: "E", description: "French 2-pin with earth pin" },
-  { type: "F", description: "German 2-pin with earth clips" },
-  { type: "G", description: "British 3-pin" },
-  { type: "H", description: "Israeli 3-pin" },
-  { type: "I", description: "Australian 3-pin" },
-  { type: "J", description: "Swiss 3-pin" },
-  { type: "K", description: "Danish 3-pin" },
-  { type: "L", description: "Italian 3-pin" },
-  { type: "M", description: "South African 3-pin (large)" },
-  { type: "N", description: "Brazilian 3-pin" },
-  { type: "O", description: "Thai 3-pin" },
-]
+export default function PowerAdapterPage() {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedPlugType, setSelectedPlugType] = useState<string>("all")
+  const [selectedContinent, setSelectedContinent] = useState<string>("all")
+  const [modalPlugType, setModalPlugType] = useState<string | null>(null)
 
-export default function PowerAdapterApp() {
-  const [search, setSearch] = useState("")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
-  const [continentFilter, setContinentFilter] = useState<string>("all")
-  const [selectedPlug, setSelectedPlug] = useState<string | null>(null)
-
-  const filteredData = useMemo(() => {
+  const filteredCountries = useMemo(() => {
     return adapterData.filter((item) => {
-      const matchesSearch = !search.trim() || item.country.toLowerCase().includes(search.toLowerCase())
-      const matchesPlugType = typeFilter === "all" || item.types.includes(typeFilter)
-      const matchesContinent = continentFilter === "all" || item.continent === continentFilter
+      const matchesSearch = !searchQuery.trim() || item.country.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesPlugType = selectedPlugType === "all" || item.types.includes(selectedPlugType)
+      const matchesContinent = selectedContinent === "all" || item.continent === selectedContinent
       return matchesSearch && matchesPlugType && matchesContinent
     })
-  }, [search, typeFilter, continentFilter])
-
-  const renderPlugIcon = (type: string) => {
-    const IconComponent = plugIconMap[type as keyof typeof plugIconMap]
-    return IconComponent ? <IconComponent /> : null
-  }
+  }, [searchQuery, selectedPlugType, selectedContinent])
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="mx-auto max-w-6xl p-6">
-        <header className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold tracking-tight">Power Adapter Reference</h1>
-          <p className="text-neutral-600">Check power adapter types, voltage, and frequency by country</p>
-        </header>
+    <main className="min-h-screen bg-background p-4 md:p-8">
+      <div className="mx-auto max-w-4xl">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-mono font-semibold mb-2">Power Adapters</h1>
+          <p className="text-muted-foreground">Check plug types and voltage by country</p>
+        </div>
 
-        <div className="mb-6 flex flex-col gap-4 md:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-            <Input
-              placeholder="Search countries..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search country..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
 
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full md:w-[200px]">
-              <SelectValue placeholder="Filter by type" />
+        <div className="flex flex-wrap gap-3 mb-6">
+          <Select value={selectedPlugType} onValueChange={setSelectedPlugType}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Plug Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              {allPlugTypes.map((type) => {
-                const IconComponent = plugIconMap[type as keyof typeof plugIconMap]
-                return (
-                  <SelectItem key={type} value={type}>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded border border-neutral-200 bg-white">
-                        {IconComponent ? <IconComponent /> : null}
-                      </div>
-                      <span>Type {type}</span>
-                    </div>
-                  </SelectItem>
-                )
-              })}
+              <SelectItem value="all">All Plug Types</SelectItem>
+              {allPlugTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  Type {type}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
-          <Select value={continentFilter} onValueChange={setContinentFilter}>
-            <SelectTrigger className="w-full md:w-[200px]">
-              <SelectValue placeholder="Filter by continent" />
+          <Select value={selectedContinent} onValueChange={setSelectedContinent}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Continent" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Continents</SelectItem>
@@ -691,114 +663,157 @@ export default function PowerAdapterApp() {
             </SelectContent>
           </Select>
 
-          {(typeFilter !== "all" || continentFilter !== "all" || search) && (
+          {(selectedPlugType !== "all" || selectedContinent !== "all" || searchQuery) && (
             <button
               onClick={() => {
-                setTypeFilter("all")
-                setContinentFilter("all")
-                setSearch("")
+                setSelectedPlugType("all")
+                setSelectedContinent("all")
+                setSearchQuery("")
               }}
-              className="flex items-center gap-2 rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-neutral-50"
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
             >
               <X className="h-4 w-4" />
-              Clear
+              Clear filters
             </button>
           )}
         </div>
 
-        <div className="space-y-3">
-          {filteredData.map((item) => (
-            <Card key={item.country} className="p-4">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={`https://flagcdn.com/w80/${item.code.toLowerCase()}.png`}
-                    alt={`${item.country} flag`}
-                    className="h-8 w-8 rounded shadow-sm object-cover"
-                  />
-                  <h3 className="text-lg font-semibold">{item.country}</h3>
-                </div>
+        {/* Results Count */}
+        <div className="mb-4 text-sm text-muted-foreground">
+          {filteredCountries.length} {filteredCountries.length === 1 ? "country" : "countries"}
+        </div>
 
-                <div className="flex flex-wrap items-center gap-4 text-sm md:gap-6">
-                  <div className="flex items-center gap-2">
-                    <span className="text-neutral-500">Types:</span>
-                    <div className="flex gap-1">
-                      {item.types.map((type) => {
-                        const IconComponent = plugIconMap[type as keyof typeof plugIconMap]
-                        return (
-                          <button
-                            key={type}
-                            onClick={() => setSelectedPlug(type)}
-                            className="flex h-8 w-8 items-center justify-center rounded border border-neutral-200 bg-white transition-colors hover:border-neutral-400 hover:bg-neutral-50"
-                          >
-                            {IconComponent ? <IconComponent /> : null}
-                          </button>
-                        )
-                      })}
+        {/* Country List */}
+        <div className="grid gap-3">
+          {filteredCountries.map((item) => (
+            <Card key={item.country} className="p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex-1 flex items-center gap-3">
+                  <img
+                    src={`https://flagcdn.com/w40/${item.code.toLowerCase()}.png`}
+                    alt={`${item.country} flag`}
+                    className="w-8 h-6 object-cover border border-border"
+                  />
+                  <div>
+                    <h3 className="font-mono font-medium mb-1">{item.country}</h3>
+                    <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                      <span>{item.voltage}</span>
+                      <span>•</span>
+                      <span>{item.frequency}</span>
+                      <span>•</span>
+                      <span className="text-xs">{item.continent}</span>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-neutral-500">Voltage:</span>
-                    <span className="font-medium">{item.voltage}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-neutral-500">Frequency:</span>
-                    <span className="font-medium">{item.frequency}</span>
-                  </div>
+                </div>
+                <div className="flex gap-2">
+                  {item.types.map((type) => {
+                    const IconComponent = plugIconMap[type as keyof typeof plugIconMap]
+                    return (
+                      <button
+                        key={type}
+                        onClick={() => setModalPlugType(type)}
+                        className="relative flex h-12 w-12 items-center justify-center border border-border bg-muted hover:bg-muted/80 transition-colors cursor-pointer"
+                        title={`Type ${type} - Click to enlarge`}
+                      >
+                        <IconComponent />
+                        <span className="absolute bottom-0.5 right-0.5 text-[10px] font-mono font-medium opacity-50">
+                          {type}
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             </Card>
           ))}
         </div>
 
-        {filteredData.length === 0 && (
-          <div className="py-12 text-center text-neutral-500">
-            No countries found matching your filters. Try adjusting your search or filters.
-          </div>
+        {/* No Results */}
+        {filteredCountries.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">No countries found matching your filters</div>
         )}
 
-        <Card className="mt-12 p-6">
-          <h2 className="mb-4 text-xl font-bold">Plug Type Reference</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {plugTypeInfo.map((plug) => {
+        {/* Plug Type Reference */}
+        <div className="mt-12 border-t border-border pt-8">
+          <h2 className="text-xl font-mono font-semibold mb-4">Plug Type Reference</h2>
+          <div className="grid gap-3 text-sm">
+            {[
+              { type: "A", desc: "North American 2-pin (ungrounded)" },
+              { type: "B", desc: "North American 3-pin (grounded)" },
+              { type: "C", desc: "European 2-pin (ungrounded)" },
+              { type: "D", desc: "Indian 3-pin (large)" },
+              { type: "E", desc: "French 2-pin with earth pin" },
+              { type: "F", desc: "German 2-pin with earth clips" },
+              { type: "G", desc: "British 3-pin" },
+              { type: "H", desc: "Israeli 3-pin" },
+              { type: "I", desc: "Australian 3-pin" },
+              { type: "J", desc: "Swiss 3-pin" },
+              { type: "K", desc: "Danish 3-pin" },
+              { type: "L", desc: "Italian 3-pin" },
+              { type: "M", desc: "South African 3-pin (large)" },
+              { type: "N", desc: "Brazilian 3-pin" },
+              { type: "O", desc: "Thai 3-pin" },
+            ].map((plug) => {
               const IconComponent = plugIconMap[plug.type as keyof typeof plugIconMap]
               return (
                 <button
                   key={plug.type}
-                  onClick={() => setSelectedPlug(plug.type)}
-                  className="flex items-start gap-3 rounded-lg border border-neutral-200 bg-white p-3 text-left transition-colors hover:border-neutral-400 hover:bg-neutral-50"
+                  onClick={() => setModalPlugType(plug.type)}
+                  className="flex items-center gap-3 p-3 border border-border hover:bg-muted/50 transition-colors text-left cursor-pointer"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded border border-neutral-200 bg-white">
-                    {IconComponent ? <IconComponent /> : null}
+                  <div className="relative flex h-12 w-12 items-center justify-center border border-border bg-muted flex-shrink-0">
+                    <IconComponent />
+                    <span className="absolute bottom-0.5 right-0.5 text-[10px] font-mono font-medium opacity-50">
+                      {plug.type}
+                    </span>
                   </div>
-                  <div className="min-w-0">
-                    <div className="mb-1 font-semibold">Type {plug.type}</div>
-                    <div className="text-sm text-neutral-600">{plug.description}</div>
+                  <div>
+                    <div className="font-mono font-medium">Type {plug.type}</div>
+                    <div className="text-muted-foreground">{plug.desc}</div>
                   </div>
                 </button>
               )
             })}
           </div>
-        </Card>
+        </div>
       </div>
 
-      <Dialog open={selectedPlug !== null} onOpenChange={() => setSelectedPlug(null)}>
+      <Dialog open={modalPlugType !== null} onOpenChange={(open) => !open && setModalPlugType(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Type {selectedPlug}</DialogTitle>
+            <DialogTitle className="font-mono">Type {modalPlugType}</DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center p-8">
-            {selectedPlug && plugIconMap[selectedPlug as keyof typeof plugIconMap] && (
-              <div className="h-48 w-48">{renderPlugIcon(plugIconMap[selectedPlug as keyof typeof plugIconMap])}</div>
-            )}
+            <div className="relative flex h-48 w-48 items-center justify-center border-2 border-border bg-muted">
+              {modalPlugType && plugIconMap[modalPlugType as keyof typeof plugIconMap]?.()}
+              <span className="absolute bottom-2 right-2 text-2xl font-mono font-medium opacity-30">
+                {modalPlugType}
+              </span>
+            </div>
           </div>
-          <div className="text-sm text-neutral-600">
-            {plugTypeInfo.find((p) => p.type === selectedPlug)?.description}
+          <div className="text-sm text-muted-foreground text-center">
+            {
+              [
+                { type: "A", desc: "North American 2-pin (ungrounded)" },
+                { type: "B", desc: "North American 3-pin (grounded)" },
+                { type: "C", desc: "European 2-pin (ungrounded)" },
+                { type: "D", desc: "Indian 3-pin (large)" },
+                { type: "E", desc: "French 2-pin with earth pin" },
+                { type: "F", desc: "German 2-pin with earth clips" },
+                { type: "G", desc: "British 3-pin" },
+                { type: "H", desc: "Israeli 3-pin" },
+                { type: "I", desc: "Australian 3-pin" },
+                { type: "J", desc: "Swiss 3-pin" },
+                { type: "K", desc: "Danish 3-pin" },
+                { type: "L", desc: "Italian 3-pin" },
+                { type: "M", desc: "South African 3-pin (large)" },
+                { type: "N", desc: "Brazilian 3-pin" },
+                { type: "O", desc: "Thai 3-pin" },
+              ].find((p) => p.type === modalPlugType)?.desc
+            }
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </main>
   )
 }
