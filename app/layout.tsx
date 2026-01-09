@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     description: "Check power adapter types, voltage, and frequency for countries worldwide",
     images: ["/og"],
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://v0-power-adapter-app.vercel.app"),
 }
 
 export default function RootLayout({
