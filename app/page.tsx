@@ -3,9 +3,9 @@
 import { useState, useMemo } from "react"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { Search, X } from "lucide-react"
+import { Search, X, RotateCcw } from "lucide-react"
 import { plugIconMap } from "@/components/plug-icons"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { continentIconMap } from "@/components/continent-icons"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 const adapterData = [
@@ -600,18 +600,18 @@ const allContinents = Array.from(new Set(adapterData.map((item) => item.continen
 
 export default function PowerAdapterPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedPlugType, setSelectedPlugType] = useState<string>("all")
-  const [selectedContinent, setSelectedContinent] = useState<string>("all")
+  const [selectedPlugTypes, setSelectedPlugTypes] = useState<string[]>([])
+  const [selectedContinents, setSelectedContinents] = useState<string[]>([])
   const [modalPlugType, setModalPlugType] = useState<string | null>(null)
 
   const filteredCountries = useMemo(() => {
     return adapterData.filter((item) => {
       const matchesSearch = !searchQuery.trim() || item.country.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesPlugType = selectedPlugType === "all" || item.types.includes(selectedPlugType)
-      const matchesContinent = selectedContinent === "all" || item.continent === selectedContinent
+      const matchesPlugType = selectedPlugTypes.length === 0 || selectedPlugTypes.some(type => item.types.includes(type))
+      const matchesContinent = selectedContinents.length === 0 || selectedContinents.includes(item.continent)
       return matchesSearch && matchesPlugType && matchesContinent
     })
-  }, [searchQuery, selectedPlugType, selectedContinent])
+  }, [searchQuery, selectedPlugTypes, selectedContinents])
 
   return (
     <main className="min-h-screen bg-background p-4 md:p-8">
@@ -634,47 +634,102 @@ export default function PowerAdapterPage() {
           />
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-6">
-          <Select value={selectedPlugType} onValueChange={setSelectedPlugType}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Plug Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Plug Types</SelectItem>
-              {allPlugTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  Type {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="mb-6 pt-4">
+          {/* Plug Type Filter - Clickable Buttons */}
+          <div className="mb-4">
+            <div className="text-sm font-medium mb-2 text-muted-foreground">Plug Type</div>
+            <div className="flex flex-wrap gap-2 justify-between">
+              {allPlugTypes.map((type) => {
+                const IconComponent = plugIconMap[type as keyof typeof plugIconMap]
+                const isSelected = selectedPlugTypes.includes(type)
+                return (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      setSelectedPlugTypes(prev => 
+                        prev.includes(type) 
+                          ? prev.filter(t => t !== type)
+                          : [...prev, type]
+                      )
+                    }}
+                    title={`Type ${type}`}
+                    className={`p-4 pb-2 rounded-md border transition-colors flex flex-col items-center justify-center flex-1 min-w-[80px] ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background border-border hover:bg-muted"
+                    }`}
+                  >
+                    <span className="w-16 h-16 flex-shrink-0 mb-1">
+                      <IconComponent />
+                    </span>
+                    <span className="text-xs font-medium">Type {type}</span>
+                  </button>
+                )
+              })}
+              <button
+                onClick={() => {
+                  setSelectedPlugTypes([])
+                  setSelectedContinents([])
+                  setSearchQuery("")
+                }}
+                title="Reset filters"
+                className="p-4 pb-2 rounded-md border transition-colors flex flex-col items-center justify-center flex-1 min-w-[80px] bg-background border-border hover:bg-muted"
+              >
+                <RotateCcw className="w-6 h-6 mb-1" />
+                <span className="text-xs font-medium">Reset</span>
+              </button>
+            </div>
+          </div>
 
-          <Select value={selectedContinent} onValueChange={setSelectedContinent}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Continent" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Continents</SelectItem>
-              {allContinents.map((continent) => (
-                <SelectItem key={continent} value={continent}>
-                  {continent}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Continent Filter - Clickable Buttons */}
+          <div className="mb-4">
+            <div className="text-sm font-medium mb-2 text-muted-foreground">Continent</div>
+            <div className="flex flex-wrap gap-2 justify-between">
+              {allContinents.map((continent) => {
+                const IconComponent = continentIconMap[continent as keyof typeof continentIconMap]
+                const isSelected = selectedContinents.includes(continent)
+                return (
+                  <button
+                    key={continent}
+                    onClick={() => {
+                      setSelectedContinents(prev => 
+                        prev.includes(continent) 
+                          ? prev.filter(c => c !== continent)
+                          : [...prev, continent]
+                      )
+                    }}
+                    title={continent}
+                    className={`p-4 pb-2 rounded-md border transition-colors flex flex-col items-center justify-center flex-1 min-w-[80px] ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background border-border hover:bg-muted"
+                    }`}
+                  >
+                    <span className="w-16 h-16 flex-shrink-0 mb-1">
+                      <IconComponent />
+                    </span>
+                    <span className="text-xs font-medium text-center leading-tight">{continent}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
-          {(selectedPlugType !== "all" || selectedContinent !== "all" || searchQuery) && (
-            <button
-              onClick={() => {
-                setSelectedPlugType("all")
-                setSelectedContinent("all")
-                setSearchQuery("")
-              }}
-              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
-            >
-              <X className="h-4 w-4" />
-              Clear filters
-            </button>
+          {/* Clear Filters Button */}
+          {(selectedPlugTypes.length > 0 || selectedContinents.length > 0 || searchQuery) && (
+            <div className="mb-4">
+              <button
+                onClick={() => {
+                  setSelectedPlugTypes([])
+                  setSelectedContinents([])
+                  setSearchQuery("")
+                }}
+                className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+              >
+                <X className="h-4 w-4" />
+                Clear filters
+              </button>
+            </div>
           )}
         </div>
 
@@ -688,21 +743,22 @@ export default function PowerAdapterPage() {
           {filteredCountries.map((item) => (
             <Card key={item.country} className="p-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex-1 flex items-center gap-3">
-                  <img
-                    src={`https://flagcdn.com/w40/${item.code.toLowerCase()}.png`}
-                    alt={`${item.country} flag`}
-                    className="w-8 h-6 object-cover border border-border"
-                  />
-                  <div>
-                    <h3 className="font-mono font-medium mb-1">{item.country}</h3>
-                    <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                      <span>{item.voltage}</span>
-                      <span>•</span>
-                      <span>{item.frequency}</span>
-                      <span>•</span>
-                      <span className="text-xs">{item.continent}</span>
-                    </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-1">
+                    <img
+                      src={`https://flagcdn.com/w160/${item.code.toLowerCase()}.png`}
+                      srcSet={`https://flagcdn.com/w320/${item.code.toLowerCase()}.png 2x`}
+                      alt={`${item.country} flag`}
+                      className="w-8 h-6 object-cover border border-border"
+                    />
+                    <h3 className="font-mono font-medium">{item.country}</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                    <span>{item.voltage}</span>
+                    <span>•</span>
+                    <span>{item.frequency}</span>
+                    <span>•</span>
+                    <span className="text-xs pt-0.5">{item.continent}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
