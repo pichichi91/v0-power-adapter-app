@@ -684,8 +684,8 @@ export default function PowerAdapterPage() {
 
           {/* Plug Type Filter - Second */}
           <div className="mb-4">
-            <div className="text-sm font-medium mb-2 text-muted-foreground">Plug Type</div>
-            <div className="flex flex-wrap gap-2 justify-between">
+            <div className="text-sm font-medium mb-3 text-muted-foreground">Plug Type</div>
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
               {allPlugTypes.map((type) => {
                 const IconComponent = plugIconMap[type as keyof typeof plugIconMap]
                 const isSelected = selectedPlugTypes.includes(type)
@@ -704,18 +704,39 @@ export default function PowerAdapterPage() {
                     }}
                     disabled={!isAvailable}
                     title={isAvailable ? `Type ${type}` : `Type ${type} (not available in selected continents)`}
-                    className={`p-4 pb-2 rounded-md border transition-colors flex flex-col items-center justify-center flex-1 min-w-[80px] ${
-                      isSelected
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : isAvailable
-                        ? "bg-background border-border hover:bg-muted"
-                        : "bg-background border-border opacity-40 cursor-not-allowed"
+                    className={`relative flex flex-col items-center justify-center transition-all duration-200 ${
+                      isAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-40"
                     }`}
                   >
-                    <span className="w-16 h-16 flex-shrink-0 mb-1">
-                      <IconComponent />
+                    {/* Push Button - 3D Effect */}
+                    <div className={`relative w-20 h-20 rounded-lg transition-all duration-200 border-2 ${
+                      isSelected
+                        ? "bg-green-400 border-green-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(0,0,0,0.2)] translate-y-0.5"
+                        : isAvailable
+                        ? "bg-muted border-border shadow-[0_4px_6px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_8px_rgba(0,0,0,0.15),0_3px_6px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]"
+                        : "bg-muted border-border shadow-md"
+                    }`}>
+                      {/* Button face with icon */}
+                      <div className={`absolute inset-0 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                        isSelected ? "bg-green-500/20" : "bg-background/50"
+                      }`}>
+                        <div className={`w-12 h-12 transition-opacity duration-200 ${
+                          isSelected ? "opacity-100" : "opacity-70"
+                        }`}>
+                          <IconComponent />
+                        </div>
+                      </div>
+                      {/* Top highlight for 3D effect */}
+                      {!isSelected && isAvailable && (
+                        <div className="absolute top-1 left-1/2 -translate-x-1/2 w-12 h-4 rounded-full bg-white/30 blur-[2px]" />
+                      )}
+                    </div>
+                    {/* Label */}
+                    <span className={`text-xs font-medium mt-2 transition-colors ${
+                      isSelected ? "text-green-500 font-semibold" : "text-muted-foreground"
+                    }`}>
+                      Type {type}
                     </span>
-                    <span className="text-xs font-medium">Type {type}</span>
                   </button>
                 )
               })}
@@ -726,10 +747,12 @@ export default function PowerAdapterPage() {
                   setSearchQuery("")
                 }}
                 title="Reset filters"
-                className="p-4 pb-2 rounded-md border transition-colors flex flex-col items-center justify-center flex-1 min-w-[80px] bg-background border-border hover:bg-muted"
+                className="relative flex flex-col items-center justify-center cursor-pointer"
               >
-                <RotateCcw className="w-6 h-6 mb-1" />
-                <span className="text-xs font-medium">Reset</span>
+                <div className="w-20 h-20 flex items-center justify-center">
+                  <RotateCcw className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <span className="text-xs font-medium mt-2 text-muted-foreground">Reset</span>
               </button>
             </div>
           </div>
