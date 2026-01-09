@@ -604,14 +604,45 @@ export default function PowerAdapterPage() {
   const [selectedContinents, setSelectedContinents] = useState<string[]>([])
   const [modalPlugType, setModalPlugType] = useState<string | null>(null)
 
+  // Filter countries by continent first (for cascading filters)
+  const continentFilteredData = useMemo(() => {
+    if (selectedContinents.length === 0) return adapterData
+    return adapterData.filter((item) => selectedContinents.includes(item.continent))
+  }, [selectedContinents])
+
+  // Get available plug types based on continent selection
+  const availablePlugTypes = useMemo(() => {
+    return Array.from(new Set(continentFilteredData.flatMap((item) => item.types))).sort()
+  }, [continentFilteredData])
+
+  // Filter countries by all criteria
   const filteredCountries = useMemo(() => {
-    return adapterData.filter((item) => {
+    return continentFilteredData.filter((item) => {
       const matchesSearch = !searchQuery.trim() || item.country.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesPlugType = selectedPlugTypes.length === 0 || selectedPlugTypes.some(type => item.types.includes(type))
-      const matchesContinent = selectedContinents.length === 0 || selectedContinents.includes(item.continent)
-      return matchesSearch && matchesPlugType && matchesContinent
+      return matchesSearch && matchesPlugType
     })
-  }, [searchQuery, selectedPlugTypes, selectedContinents])
+  }, [searchQuery, selectedPlugTypes, continentFilteredData])
+
+  // Clear plug types that are no longer available when continent changes
+  const handleContinentChange = (continent: string) => {
+    setSelectedContinents(prev => {
+      const newContinents = prev.includes(continent)
+        ? prev.filter(c => c !== continent)
+        : [...prev, continent]
+      
+      // Update available plug types based on new continent selection
+      const newContinentData = newContinents.length === 0 
+        ? adapterData 
+        : adapterData.filter((item) => newContinents.includes(item.continent))
+      const newAvailableTypes = Array.from(new Set(newContinentData.flatMap((item) => item.types)))
+      
+      // Remove selected plug types that are no longer available
+      setSelectedPlugTypes(prevTypes => prevTypes.filter(type => newAvailableTypes.includes(type)))
+      
+      return newContinents
+    })
+  }
 
   return (
     <main className="min-h-screen bg-background p-4 md:p-8">
@@ -622,41 +653,63 @@ export default function PowerAdapterPage() {
           <p className="text-muted-foreground">Check plug types and voltage by country</p>
         </div>
 
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search country..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+        <div className="mb-6">
+          {/* Continent Filter - First */}
+          <div className="mb-4">
+            <div className="text-sm font-medium mb-2 text-muted-foreground">Continent</div>
+            <div className="flex flex-wrap gap-2 justify-between">
+              {allContinents.map((continent) => {
+                const IconComponent = continentIconMap[continent as keyof typeof continentIconMap]
+                const isSelected = selectedContinents.includes(continent)
+                return (
+                  <button
+                    key={continent}
+                    onClick={() => handleContinentChange(continent)}
+                    title={continent}
+                    className={`p-4 pb-2 rounded-md border transition-colors flex flex-col items-center justify-center flex-1 min-w-[80px] ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background border-border hover:bg-muted"
+                    }`}
+                  >
+                    <span className="w-16 h-16 flex-shrink-0 mb-1">
+                      <IconComponent />
+                    </span>
+                    <span className="text-xs font-medium text-center leading-tight">{continent}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
-        <div className="mb-6 pt-4">
-          {/* Plug Type Filter - Clickable Buttons */}
+          {/* Plug Type Filter - Second */}
           <div className="mb-4">
             <div className="text-sm font-medium mb-2 text-muted-foreground">Plug Type</div>
             <div className="flex flex-wrap gap-2 justify-between">
               {allPlugTypes.map((type) => {
                 const IconComponent = plugIconMap[type as keyof typeof plugIconMap]
                 const isSelected = selectedPlugTypes.includes(type)
+                const isAvailable = availablePlugTypes.includes(type)
                 return (
                   <button
                     key={type}
                     onClick={() => {
-                      setSelectedPlugTypes(prev => 
-                        prev.includes(type) 
-                          ? prev.filter(t => t !== type)
-                          : [...prev, type]
-                      )
+                      if (isAvailable) {
+                        setSelectedPlugTypes(prev => 
+                          prev.includes(type) 
+                            ? prev.filter(t => t !== type)
+                            : [...prev, type]
+                        )
+                      }
                     }}
-                    title={`Type ${type}`}
+                    disabled={!isAvailable}
+                    title={isAvailable ? `Type ${type}` : `Type ${type} (not available in selected continents)`}
                     className={`p-4 pb-2 rounded-md border transition-colors flex flex-col items-center justify-center flex-1 min-w-[80px] ${
                       isSelected
                         ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background border-border hover:bg-muted"
+                        : isAvailable
+                        ? "bg-background border-border hover:bg-muted"
+                        : "bg-background border-border opacity-40 cursor-not-allowed"
                     }`}
                   >
                     <span className="w-16 h-16 flex-shrink-0 mb-1">
@@ -681,38 +734,16 @@ export default function PowerAdapterPage() {
             </div>
           </div>
 
-          {/* Continent Filter - Clickable Buttons */}
-          <div className="mb-4">
-            <div className="text-sm font-medium mb-2 text-muted-foreground">Continent</div>
-            <div className="flex flex-wrap gap-2 justify-between">
-              {allContinents.map((continent) => {
-                const IconComponent = continentIconMap[continent as keyof typeof continentIconMap]
-                const isSelected = selectedContinents.includes(continent)
-                return (
-                  <button
-                    key={continent}
-                    onClick={() => {
-                      setSelectedContinents(prev => 
-                        prev.includes(continent) 
-                          ? prev.filter(c => c !== continent)
-                          : [...prev, continent]
-                      )
-                    }}
-                    title={continent}
-                    className={`p-4 pb-2 rounded-md border transition-colors flex flex-col items-center justify-center flex-1 min-w-[80px] ${
-                      isSelected
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background border-border hover:bg-muted"
-                    }`}
-                  >
-                    <span className="w-16 h-16 flex-shrink-0 mb-1">
-                      <IconComponent />
-                    </span>
-                    <span className="text-xs font-medium text-center leading-tight">{continent}</span>
-                  </button>
-                )
-              })}
-            </div>
+          {/* Search - Last */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search country..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
           </div>
 
           {/* Clear Filters Button */}
