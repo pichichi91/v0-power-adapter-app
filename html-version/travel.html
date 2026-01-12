@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Compatibility - Power Adapters</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <div class="container">
+      <!-- Navigation -->
+      <div class="nav">
+        <a href="index.html" class="nav-link">Browse</a>
+        <a href="travel.html" class="nav-link active">Travel</a>
+      </div>
+
+      <!-- Header -->
+      <div class="header">
+        <h1>Travel Compatibility</h1>
+        <p id="headerSubtitle">
+          Can I go from <span class="badge outline">X</span> to <span class="badge outline">Y</span> with my plug if I am from the following country?
+        </p>
+      </div>
+
+      <!-- Country Selectors -->
+      <div style="margin-bottom: 2rem;">
+        <div style="margin-bottom: 1.5rem;">
+          <label class="filter-label">I am from (Origin Country)</label>
+          <div class="combobox-container">
+            <div class="combobox-input" id="originCombobox">
+              <span id="originValue" style="color: var(--muted-foreground);">Select your home country</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="flex-shrink: 0;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+            <div class="combobox-dropdown" id="originDropdown">
+              <div class="combobox-search">
+                <input type="text" class="combobox-search-input" id="originSearch" placeholder="Search...">
+              </div>
+              <div class="combobox-options" id="originOptions"></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="filter-label">I am traveling to (Destination Country)</label>
+          <div class="combobox-container">
+            <div class="combobox-input" id="destinationCombobox">
+              <span id="destinationValue" style="color: var(--muted-foreground);">Select destination country</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="flex-shrink: 0;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+            <div class="combobox-dropdown" id="destinationDropdown">
+              <div class="combobox-search">
+                <input type="text" class="combobox-search-input" id="destinationSearch" placeholder="Search...">
+              </div>
+              <div class="combobox-options" id="destinationOptions"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compatibility Result -->
+      <div class="compat-card" id="compatCard" style="display: none;">
+        <div class="compat-header">
+          <svg class="compat-icon" id="compatIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div style="flex: 1;">
+            <h2 class="compat-title" id="compatTitle"></h2>
+            <p class="compat-text" id="compatText"></p>
+          </div>
+        </div>
+
+        <!-- Compatible Types -->
+        <div class="compat-types" id="compatTypes" style="display: none;">
+          <div class="compat-types-title">Compatible Plug Types:</div>
+          <div class="compat-types-grid" id="compatTypesGrid"></div>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="compat-details">
+          <!-- Origin Country -->
+          <div class="compat-country">
+            <div class="compat-country-title" id="originTitle"></div>
+            <div class="compat-country-header">
+              <img class="compat-country-flag" id="originFlag" src="" alt="">
+              <div class="compat-country-info">
+                <div class="compat-country-voltage" id="originVoltage"></div>
+                <div class="compat-country-frequency" id="originFrequency"></div>
+              </div>
+            </div>
+            <div class="compat-country-plugs" id="originPlugs"></div>
+          </div>
+
+          <!-- Destination Country -->
+          <div class="compat-country">
+            <div class="compat-country-title" id="destinationTitle"></div>
+            <div class="compat-country-header">
+              <img class="compat-country-flag" id="destinationFlag" src="" alt="">
+              <div class="compat-country-info">
+                <div class="compat-country-voltage" id="destinationVoltage"></div>
+                <div class="compat-country-frequency" id="destinationFrequency"></div>
+              </div>
+            </div>
+            <div class="compat-country-plugs" id="destinationPlugs"></div>
+          </div>
+        </div>
+
+        <!-- Voltage/Frequency Warnings -->
+        <div class="compat-warning" id="compatWarning" style="display: none;">
+          <svg class="compat-warning-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <div class="compat-warning-content">
+            <div class="compat-warning-title">Voltage/Frequency Difference</div>
+            <div class="compat-warning-text" id="warningText"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="compat-card" id="instructionsCard">
+        <div style="text-align: center; color: var(--muted-foreground);">
+          <p>Select your origin and destination countries to check plug compatibility.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle"></h3>
+      </div>
+      <div class="modal-body">
+        <div class="modal-plug" id="modalPlug"></div>
+        <div class="modal-desc" id="modalDesc"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="data.js"></script>
+  <script src="icons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

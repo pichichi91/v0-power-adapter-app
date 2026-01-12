@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Adapters</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <div class="container">
+      <!-- Navigation -->
+      <div class="nav">
+        <a href="index.html" class="nav-link active">Browse</a>
+        <a href="travel.html" class="nav-link">Travel</a>
+      </div>
+
+      <!-- Header -->
+      <div class="header">
+        <h1>Power Adapters</h1>
+        <p>Check plug types and voltage by country</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <!-- Continent Filter -->
+        <div class="filter-section">
+          <div class="filter-label">Continent</div>
+          <div class="continent-grid" id="continentGrid"></div>
+        </div>
+
+        <!-- Plug Type Filter -->
+        <div class="filter-section">
+          <div class="filter-label">Plug Type</div>
+          <div class="plug-grid" id="plugGrid"></div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-container">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search country...">
+        </div>
+
+        <!-- Clear Filters -->
+        <div class="clear-filters" id="clearFilters" style="display: none;">
+          <button class="clear-btn" id="clearBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            Clear filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <div class="results-count" id="resultsCount"></div>
+
+      <!-- Country List -->
+      <div class="country-list" id="countryList"></div>
+
+      <!-- No Results -->
+      <div class="no-results" id="noResults" style="display: none;">
+        No countries found matching your filters
+      </div>
+
+      <!-- Plug Type Reference -->
+      <div class="reference">
+        <h2>Plug Type Reference</h2>
+        <div class="reference-list" id="referenceList"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle"></h3>
+      </div>
+      <div class="modal-body">
+        <div class="modal-plug" id="modalPlug"></div>
+        <div class="modal-desc" id="modalDesc"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="data.js"></script>
+  <script src="icons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
